@@ -17,7 +17,7 @@ Create a Supabase project and apply migrations in order:
 5. `005_bootstrap_dcl_workspace.sql`
 6. `006_workspace_onboarding.sql`
 
-The multi-tenant migrations enable RLS and workspace isolation. Browser/client access must use the publishable/anon key. The service-role key is server-only and is reserved for trusted background discovery workers.
+The multi-tenant migrations enable RLS and workspace isolation. Browser/client access must use the publishable/anon key. The service-role key is server-only and is reserved for trusted background discovery workers and the one-time pre-provisioned workspace claim.
 
 ## 3. Authentication
 
@@ -41,6 +41,12 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_SITE_URL=https://your-product-domain.com
 
+# Optional one-time claim of an already seeded workspace
+BOOTSTRAP_WORKSPACE_ID=
+BOOTSTRAP_OWNER_EMAIL=
+
+# Background discovery
+WORKSPACE_ID=
 STORELEADS_API_KEY=
 BUILTWITH_API_KEY=
 OPENAI_API_KEY=
@@ -51,11 +57,21 @@ OUTBOUND_PROVIDER_API_KEY=
 
 `NEXT_PUBLIC_SUPABASE_ANON_KEY` is supported as a temporary fallback while migrating older Supabase projects, but new environments should prefer the publishable key.
 
-## 5. First customer / DCL workspace
+## 5. First customer / pre-provisioned workspace
 
 Migration `005_bootstrap_dcl_workspace.sql` seeds the internal Digital Commerce Lab workspace and backfills pre-commercial records into it.
 
-New SaaS customers create their own workspace from `/onboarding`. The `create_workspace_with_owner` RPC atomically creates:
+To attach the first authenticated owner without hard-coding an identity in the repository:
+
+1. Set `BOOTSTRAP_WORKSPACE_ID` to the seeded workspace UUID.
+2. Set `BOOTSTRAP_OWNER_EMAIL` to the email that is allowed to claim it.
+3. Sign up / confirm that account.
+4. The onboarding screen will offer **Claim existing workspace** when the authenticated email matches.
+5. `/bootstrap` inserts the caller as owner using a server-only admin client.
+
+The claim is deliberately one-time: it is rejected once the target workspace has any member. After the claim succeeds, remove `BOOTSTRAP_WORKSPACE_ID` and `BOOTSTRAP_OWNER_EMAIL` from the deployment environment.
+
+New SaaS customers do not use bootstrap variables. They create their own workspace from `/onboarding`. The `create_workspace_with_owner` RPC atomically creates:
 
 - workspace
 - owner membership
@@ -72,6 +88,7 @@ This avoids a first-workspace RLS deadlock.
 - Active-workspace cookies are never trusted alone; membership is revalidated before use.
 - The discovery dashboard uses the authenticated user's Supabase client, not the service-role client.
 - Background discovery workers may use the service role, but must always receive an explicit workspace ID.
+- Pre-provisioned workspace bootstrap is disabled unless both bootstrap environment variables are present, requires an authenticated matching email and refuses already-claimed workspaces.
 
 ## 7. Live discovery
 
