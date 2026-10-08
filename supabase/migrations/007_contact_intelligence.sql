@@ -1,5 +1,9 @@
 -- Buyer/contact intelligence fields. Existing contacts remain valid.
 
+alter table accounts add column if not exists suggested_buyer_role text;
+alter table accounts add column if not exists qualification_inputs jsonb not null default '{}'::jsonb;
+alter table accounts add column if not exists evidence_confidence numeric(4,3) check (evidence_confidence between 0 and 1);
+
 alter table contacts add column if not exists provider text;
 alter table contacts add column if not exists provider_person_id text;
 alter table contacts add column if not exists full_name text;
