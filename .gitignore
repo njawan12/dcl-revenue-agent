@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+coverage/
+*.log
+.DS_Store
+
+# Never commit credentials
+.env
+.env.*
+!.env.example
+
+# Local tooling
+.vercel/
+*.tsbuildinfo
