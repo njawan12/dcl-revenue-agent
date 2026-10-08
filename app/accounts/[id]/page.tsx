@@ -4,7 +4,7 @@ import { Sidebar } from '../../../components/Sidebar';
 import { ScoreRing } from '../../../components/ScoreRing';
 import { createClient } from '../../../lib/supabase/server';
 import { requireActiveWorkspace } from '../../../lib/workspaces/session';
-import { researchBuyers } from './actions';
+import { prepareOutreach, researchBuyers } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,12 +39,12 @@ export default async function AccountPage({ params, searchParams }: { params: Pr
     <Link className="back" href="/">← Daily Command Center</Link>
     <header className="opportunityHero"><div><div className="eyebrow">Opportunity intelligence</div><h1>{account.name}</h1><p>{account.domain} · {[account.country,account.industry].filter(Boolean).join(' · ')}</p><div className="tags"><span>{account.tier || 'Un-tiered'}</span><span>{account.recommended_motion || 'research-first'}</span><span>{ready ? 'Ready for review' : 'Research in progress'}</span></div></div><ScoreRing score={score}/></header>
 
-    {query.error ? <section className="panel noticePanel"><strong>Buyer research could not run</strong><p>{query.error}</p></section> : null}
+    {query.error ? <section className="panel noticePanel"><strong>Action could not complete</strong><p>{query.error}</p></section> : null}
     {query.notice ? <section className="panel noticePanel"><strong>{query.notice}</strong></section> : null}
 
     <section className="opportunityLead">
       <div className="panel thesisPanel"><span className="eyebrow">Commercial thesis</span><h2>{thesis}</h2><p className="whyNow"><strong>Why now</strong><br/>{whyNow}</p></div>
-      <div className="panel actionPanel"><span className="eyebrow">Next best action</span><h2>{nextAction}</h2><p>{ready ? 'Evidence and a verified primary buyer are present. External outreach must still pass human review.' : 'The system will not treat this account as outreach-ready until the missing proof is resolved.'}</p>{!primary && canResearch ? <form action={researchBuyers}><input type="hidden" name="accountId" value={account.id}/><button className="primary" type="submit">Research buyers</button></form> : null}</div>
+      <div className="panel actionPanel"><span className="eyebrow">Next best action</span><h2>{nextAction}</h2><p>{ready ? 'Evidence and a verified primary buyer are present. Prepare an exact draft for the held outbox; a human must review it before any external action.' : 'The system will not treat this account as outreach-ready until the missing proof is resolved.'}</p>{!primary && canResearch ? <form action={researchBuyers}><input type="hidden" name="accountId" value={account.id}/><button className="primary" type="submit">Research buyers</button></form> : null}{ready && canResearch ? <form action={prepareOutreach}><input type="hidden" name="accountId" value={account.id}/><button className="primary" type="submit">Prepare held draft</button><small>Creates a revision-bound review item. Does not send.</small></form> : null}</div>
     </section>
 
     <section className="metrics opportunityMetrics">
