@@ -1,6 +1,8 @@
 import { createBuiltWithShopifySource } from '../lib/discovery/adapters/builtwith.js';
 import { createStorefrontSource } from '../lib/discovery/adapters/storefront.js';
 import { runDiscoverySources } from '../lib/discovery/sources.js';
+import { createServiceSupabaseClient } from '../lib/db/client.js';
+import { persistDiscoveryRun } from '../lib/db/discovery.js';
 
 const apiKey = process.env.BUILTWITH_API_KEY;
 if (!apiKey) {
@@ -17,6 +19,18 @@ const candidates = await runDiscoverySources([candidateSource], { failFast: true
 const storefrontSource = createStorefrontSource({ candidates: candidates.accounts });
 const verified = await runDiscoverySources([storefrontSource]);
 
+let persistence = null;
+if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  const client = createServiceSupabaseClient();
+  persistence = await persistDiscoveryRun(client, {
+    sourceNames: [candidateSource.name, storefrontSource.name],
+    accounts: verified.accounts,
+    signals: [...candidates.signals, ...verified.signals],
+    errors: [...candidates.errors, ...verified.errors],
+    metadata: { limit, since: since ?? null, otherTechs, candidateCount: candidates.accounts.length },
+  });
+}
+
 const output = {
   generatedAt: new Date().toISOString(),
   requestedLimit: limit,
@@ -24,6 +38,7 @@ const output = {
   verifiedShopifyCount: verified.accounts.length,
   candidateErrors: candidates.errors,
   verificationErrors: verified.errors,
+  persistence,
   accounts: verified.accounts,
   signals: verified.signals,
 };
