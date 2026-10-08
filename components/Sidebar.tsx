@@ -8,7 +8,7 @@ const items = [
   { label: 'Opportunities', href: '/#opportunities' },
   { label: 'Accounts', href: '/accounts' },
   { label: 'Contacts', href: '/contacts' },
-  { label: 'Outreach', href: '/#outreach' },
+  { label: 'Outreach', href: '/outreach' },
   { label: 'Inbox', href: '/#inbox' },
   { label: 'Pipeline', href: '/#pipeline' },
   { label: 'Analytics', href: '/#analytics' },
