@@ -14,6 +14,7 @@ const account = {
 const signals = [
   { accountDomain: 'brand.com', type: 'technology', title: 'Klaviyo detected', confidence: 0.9, evidence: { technology: 'klaviyo' } },
   { accountDomain: 'brand.com', type: 'storefront', title: 'No sticky add-to-cart marker detected', confidence: 0.6, evidence: { id: 'no_sticky_atc_marker', severity: 0.5 } },
+  { accountDomain: 'brand.com', type: 'storefront', title: 'Retention opportunity detected', confidence: 0.75, evidence: { id: 'retention_opportunity', needCategory: 'retention', severity: 0.7 } },
 ];
 
 test('same commerce account can rank differently for different agency workspaces', () => {
