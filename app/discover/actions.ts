@@ -19,7 +19,7 @@ export async function queueDiscovery(formData: FormData) {
       workspaceId: workspace.id,
       jobType: 'discovery',
       scope: { source, query, country: country || null },
-      payload: { source, query, country: country || null, requestedBy: workspace.userId },
+      payload: { source, query, country: country || null },
       maxAttempts: 3,
     });
     const queued = await enqueueDurableJob(supabase, job);
