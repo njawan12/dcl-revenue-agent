@@ -4,7 +4,7 @@
 Ship a commercially credible, premium commerce revenue intelligence product for agencies and ecommerce service companies. DCL is customer #1, not a hard-coded tenant.
 
 ## Current audit
-The current repository has a sound product constitution and passing baseline, but customer-facing primary surfaces still contain sample/mock data and table-first scaffolding. Primary workflows are incomplete and must not be presented as live intelligence until their provenance and tenant boundaries are real.
+Primary Command Center and Opportunity surfaces are now workspace-backed rather than mock-backed. Revision-bound approval, held outbox, central suppression, native pipeline, change intelligence, immutable scoring receipts and score-movement explanation are implemented. Live database/provider/browser validation remains a release risk and must not be implied by CI alone.
 
 ## Product decisions
 - Initial motion: Shopify/DTC agencies and ecommerce service companies; services remain workspace configuration.
@@ -44,28 +44,28 @@ Design conservatively for privacy and outreach compliance without claiming unive
 
 ## Execution order
 ### P0 — security and contracts
-- close tenant-reference/authorization gaps;
-- define revision-bound approval + held outbox contracts;
-- central suppression enforcement;
-- versioned evidence/scoring schema;
-- durable job contract.
+- [x] close material tenant-reference/authorization gaps discovered so far;
+- [x] define revision-bound approval + held outbox contracts;
+- [x] central suppression enforcement;
+- [x] versioned evidence/scoring schema and immutable score receipts;
+- [ ] durable job contract with workspace isolation, idempotency, leases, bounded retries and inspectable terminal failures.
 
 ### P1 — real commerce intelligence
-- replace primary-screen mock dependencies with workspace-backed read models;
-- evidence receipts and score explanation;
-- commerce/storefront findings and signal history;
-- explicit partial/stale states.
+- [x] replace primary-screen mock dependencies with workspace-backed read models;
+- [x] evidence receipts and score explanation;
+- [x] commerce/storefront findings and signal history;
+- [~] explicit partial/stale states; continue acceptance hardening.
 
 ### P2 — buyer, proof and approval
-- buyer map/contact verification model;
-- approved proof library;
-- evidence-grounded draft generation contract;
-- edit/review/approval with audit history.
+- [x] buyer map/contact verification model;
+- [x] approved proof library contract;
+- [x] evidence-grounded draft generation contract;
+- [x] edit/review/approval with audit history.
 
 ### P3 — held outbox and native pipeline
-- held-only outbound queue;
-- native pipeline, tasks, next action and activity timeline;
-- CRM adapter contracts with idempotency/conflict semantics.
+- [x] held-only outbound queue;
+- [x] native pipeline, next action and activity timeline;
+- [ ] CRM adapter contracts with idempotency/conflict semantics.
 
 ### P4 — premium UX and acceptance hardening
 UX quality is continuous, but final hardening includes responsive/keyboard passes, loading/empty/error/permission/stale states, dead-nav removal and customer-demo polish.
@@ -84,10 +84,11 @@ UX quality is continuous, but final hardening includes responsive/keyboard passe
 - Live DB/provider/browser validation remains explicitly unverified until actually exercised.
 
 ## Current risks
-- Primary home currently imports `lib/mock-data`; this is incompatible with a commercial release unless unmistakably isolated as demo/sample mode.
+- Durable discovery/enrichment execution is not yet protected by a persistent lease/retry/idempotency contract.
 - Live database/provider/browser flows have not yet been verified.
 - Provider data licensing/source terms require verification before production collection at scale.
 - Jurisdiction-specific outreach rules require counsel/policy validation before enabling delivery.
+- Retention/deletion controls and region-aware policy hooks remain incomplete.
 
 ## Next implementation slice
-Start with security/data contracts and workspace-backed Command Center read model. Do not cosmetically polish mock primary screens and call them finished; premium UX must sit on truthful states and real contracts.
+Implement the durable job contract before expanding providers: workspace-scoped jobs, deterministic idempotency keys, lease ownership/expiry, bounded retries with inspectable errors, and safe terminal states. No job may send outreach or bypass suppression/approval boundaries.
