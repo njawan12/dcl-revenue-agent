@@ -16,8 +16,7 @@ alter table contacts add column if not exists metadata jsonb not null default '{
 alter table contacts add column if not exists updated_at timestamptz not null default now();
 
 create unique index if not exists contacts_workspace_account_provider_person_key
-  on contacts(workspace_id, account_id, provider, provider_person_id)
-  where provider is not null and provider_person_id is not null;
+  on contacts(workspace_id, account_id, provider, provider_person_id);
 
 create index if not exists contacts_workspace_account_buyer_idx
   on contacts(workspace_id, account_id, is_primary_buyer desc, buyer_score desc);
