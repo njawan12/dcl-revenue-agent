@@ -1,6 +1,7 @@
 import { createBuiltWithShopifySource } from '../lib/discovery/adapters/builtwith.js';
 import { createStorefrontSource } from '../lib/discovery/adapters/storefront.js';
 import { runDiscoverySources } from '../lib/discovery/sources.js';
+import { qualifyDiscoveredAccount } from '../lib/discovery/qualification.js';
 import { createServiceSupabaseClient } from '../lib/db/client.js';
 import { persistDiscoveryRun } from '../lib/db/discovery.js';
 
@@ -18,6 +19,8 @@ const candidateSource = createBuiltWithShopifySource({ apiKey, limit, since, oth
 const candidates = await runDiscoverySources([candidateSource], { failFast: true });
 const storefrontSource = createStorefrontSource({ candidates: candidates.accounts });
 const verified = await runDiscoverySources([storefrontSource]);
+const allSignals = [...candidates.signals, ...verified.signals];
+const qualifications = verified.accounts.map((account) => qualifyDiscoveredAccount(account, allSignals));
 
 let persistence = null;
 if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -25,7 +28,8 @@ if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KE
   persistence = await persistDiscoveryRun(client, {
     sourceNames: [candidateSource.name, storefrontSource.name],
     accounts: verified.accounts,
-    signals: [...candidates.signals, ...verified.signals],
+    signals: allSignals,
+    qualifications,
     errors: [...candidates.errors, ...verified.errors],
     metadata: { limit, since: since ?? null, otherTechs, candidateCount: candidates.accounts.length },
   });
@@ -36,10 +40,12 @@ const output = {
   requestedLimit: limit,
   candidateCount: candidates.accounts.length,
   verifiedShopifyCount: verified.accounts.length,
+  qualifiedCount: qualifications.filter((item) => ['qualified','priority'].includes(item.tier)).length,
   candidateErrors: candidates.errors,
   verificationErrors: verified.errors,
   persistence,
   accounts: verified.accounts,
+  qualifications,
   signals: verified.signals,
 };
 
