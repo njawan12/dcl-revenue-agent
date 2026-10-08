@@ -9,10 +9,14 @@ import { researchBuyerContacts } from '../../../lib/buyers/orchestrator';
 import { persistBuyerResearch } from '../../../lib/db/contacts';
 import { validateDraft } from '../../../lib/outreach/guardrails';
 
+function requireOperator(role: string) {
+  if (!['owner','admin','member'].includes(role)) throw new Error('workspace_operator_required');
+}
+
 export async function researchBuyers(formData: FormData) {
   const accountId = String(formData.get('accountId') || '');
   const workspace = await requireActiveWorkspace();
-  if (!['owner','admin'].includes(workspace.role)) throw new Error('workspace_admin_required');
+  requireOperator(workspace.role);
   if (!accountId) throw new Error('account_id_required');
 
   const supabase = await createClient();
@@ -30,20 +34,12 @@ export async function researchBuyers(formData: FormData) {
 
   const result = await researchBuyerContacts({
     account: { domain: account.domain },
-    qualification: {
-      suggestedBuyerRole: account.suggested_buyer_role,
-      inputs: account.qualification_inputs || {},
-    },
+    qualification: { suggestedBuyerRole: account.suggested_buyer_role, inputs: account.qualification_inputs || {} },
     prospeoApiKey: process.env.PROSPEO_API_KEY,
     hunterApiKey: process.env.HUNTER_API_KEY,
   });
 
-  await persistBuyerResearch(supabase, {
-    workspaceId: workspace.id,
-    accountId,
-    result,
-  });
-
+  await persistBuyerResearch(supabase, { workspaceId: workspace.id, accountId, result });
   revalidatePath(`/accounts/${accountId}`);
   redirect(`/accounts/${accountId}?notice=${encodeURIComponent(result.outreachReady ? 'Verified buyer found.' : 'Buyer research completed; no verified email found yet.')}`);
 }
@@ -51,7 +47,7 @@ export async function researchBuyers(formData: FormData) {
 export async function prepareOutreach(formData: FormData) {
   const accountId = String(formData.get('accountId') || '');
   const workspace = await requireActiveWorkspace();
-  if (!['owner','admin'].includes(workspace.role)) throw new Error('workspace_admin_required');
+  requireOperator(workspace.role);
   if (!accountId) throw new Error('account_id_required');
 
   const supabase = await createClient();
@@ -78,75 +74,25 @@ export async function prepareOutreach(formData: FormData) {
     claims: [] as string[],
   };
 
-  const guard = validateDraft(draft, {
-    reasonToContact,
-    contact: { emailVerified: contact.email_verified },
-    suppressed: account.suppressed,
-    approvedProofPoints: proofs || [],
-  });
+  const guard = validateDraft(draft, { reasonToContact, contact: { emailVerified: contact.email_verified }, suppressed: account.suppressed, approvedProofPoints: proofs || [] });
   if (!guard.valid) redirect(`/accounts/${accountId}?error=${encodeURIComponent(`Draft held: ${guard.errors.join(', ')}`)}`);
 
-  const evidenceSnapshot = evidence.map((signal:any) => ({
-    id: signal.id,
-    type: signal.signal_type,
-    title: signal.title,
-    sourceName: signal.source_name,
-    sourceUrl: signal.source_url,
-    observedAt: signal.observed_at,
-    confidence: signal.confidence,
-  }));
-  const recipientSnapshot = {
-    contactId: contact.id,
-    name: contact.full_name || [contact.first_name, contact.last_name].filter(Boolean).join(' '),
-    title: contact.title,
-    email: contact.email,
-    emailVerified: true,
-    verificationSource: contact.verification_source || contact.provider || null,
-  };
-  const proofSnapshot = (proofs || []).map((proof:any) => ({
-    id: proof.id,
-    clientName: proof.client_name,
-    approvedClaim: proof.approved_claim,
-    evidenceReference: proof.evidence_reference,
-    serviceTags: proof.service_tags,
-  }));
-  const complianceSnapshot = {
-    version: 'held-outbox-v1',
-    accountCountry: account.country || null,
-    verifiedBusinessContact: true,
-    suppressed: false,
-    humanApprovalRequired: true,
-    autonomousSendEnabled: false,
-    jurisdictionReviewStatus: 'required_before_send',
-  };
-  const hashPayload = JSON.stringify({
-    subject: draft.subject,
-    body: draft.body,
-    reasonToContact,
-    evidenceSnapshot,
-    proofSnapshot,
-    recipientSnapshot,
-    complianceSnapshot,
-  });
+  const evidenceSnapshot = evidence.map((signal:any) => ({ id: signal.id, type: signal.signal_type, title: signal.title, sourceName: signal.source_name, sourceUrl: signal.source_url, observedAt: signal.observed_at, confidence: signal.confidence }));
+  const recipientSnapshot = { contactId: contact.id, name: contact.full_name || [contact.first_name, contact.last_name].filter(Boolean).join(' '), title: contact.title, email: contact.email, emailVerified: true, verificationSource: contact.verification_source || contact.provider || null };
+  const proofSnapshot = (proofs || []).map((proof:any) => ({ id: proof.id, clientName: proof.client_name, approvedClaim: proof.approved_claim, evidenceReference: proof.evidence_reference, serviceTags: proof.service_tags }));
+  const complianceSnapshot = { version: 'held-outbox-v1', accountCountry: account.country || null, verifiedBusinessContact: true, suppressed: false, humanApprovalRequired: true, autonomousSendEnabled: false, jurisdictionReviewStatus: 'required_before_send' };
+  const hashPayload = JSON.stringify({ subject: draft.subject, body: draft.body, reasonToContact, evidenceSnapshot, proofSnapshot, recipientSnapshot, complianceSnapshot });
   const contentHash = createHash('sha256').update(hashPayload).digest('hex');
 
   const { data, error } = await supabase.rpc('create_held_outreach_revision', {
-    p_account_id: account.id,
-    p_contact_id: contact.id,
-    p_subject: draft.subject,
-    p_body: draft.body,
-    p_motion: account.recommended_motion || 'research-first',
-    p_reason_to_contact: reasonToContact,
-    p_evidence_snapshot: evidenceSnapshot,
-    p_proof_snapshot: proofSnapshot,
-    p_recipient_snapshot: recipientSnapshot,
-    p_compliance_snapshot: complianceSnapshot,
-    p_content_hash: contentHash,
+    p_account_id: account.id, p_contact_id: contact.id, p_subject: draft.subject, p_body: draft.body,
+    p_motion: account.recommended_motion || 'research-first', p_reason_to_contact: reasonToContact,
+    p_evidence_snapshot: evidenceSnapshot, p_proof_snapshot: proofSnapshot, p_recipient_snapshot: recipientSnapshot,
+    p_compliance_snapshot: complianceSnapshot, p_content_hash: contentHash,
   });
-  if (error || !data?.[0]?.outreach_id) {
-    redirect(`/accounts/${accountId}?error=${encodeURIComponent('Could not create the held outreach revision. No message was sent.')}`);
-  }
+  if (error || !data?.[0]?.outreach_id) redirect(`/accounts/${accountId}?error=${encodeURIComponent('Could not create the held outreach revision. No message was sent.')}`);
 
   revalidatePath(`/accounts/${accountId}`);
+  revalidatePath('/outreach');
   redirect(`/accounts/${accountId}?notice=${encodeURIComponent('Outreach draft prepared and held for human review. Nothing was sent.')}`);
 }
