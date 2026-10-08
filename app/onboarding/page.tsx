@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createWorkspace } from './actions';
 import { listUserWorkspaces } from '../../lib/workspaces/session';
+import { getBootstrapEligibility } from '../../lib/workspaces/bootstrap';
 
 const services = ['Shopify development','CRO','UX/UI','Klaviyo / retention','Analytics','Subscriptions','QA','B2B'];
 const industries = ['beauty','wellness','supplements','apparel','food-beverage','fitness','pet','home'];
@@ -8,11 +9,12 @@ const industries = ['beauty','wellness','supplements','apparel','food-beverage',
 export default async function OnboardingPage({ searchParams }: { searchParams: Promise<Record<string,string|undefined>> }) {
   const existing = await listUserWorkspaces();
   if (existing.length) redirect('/');
-  const params = await searchParams;
+  const [params, bootstrap] = await Promise.all([searchParams, getBootstrapEligibility()]);
   return <main style={{maxWidth:760,margin:'60px auto',padding:'0 24px'}}>
     <div className="eyebrow">Set up your revenue engine</div>
     <h1>Create your first workspace</h1>
     <p>This tells the engine what your agency sells and which ecommerce businesses should rank highest.</p>
+    {bootstrap.eligible ? <div className="panel" style={{marginTop:20}}><strong>A pre-provisioned workspace is available for this account.</strong><p>Claim it instead of creating a duplicate workspace.</p><a className="primary" href="/bootstrap">Claim existing workspace</a></div> : null}
     {params.error ? <div className="panel"><strong>Could not create workspace</strong><p>{params.error}</p></div> : null}
     <form action={createWorkspace} className="panel" style={{display:'grid',gap:20,marginTop:24}}>
       <label>Agency / company name<input required name="name" style={{display:'block',width:'100%',marginTop:6,padding:12}}/></label>
