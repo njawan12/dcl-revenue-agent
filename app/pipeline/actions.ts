@@ -4,9 +4,10 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '../../lib/supabase/server';
 import { requireActiveWorkspace } from '../../lib/workspaces/session';
 import { validatePipelineInput } from '../../lib/pipeline/stages';
+
 export async function updatePipeline(formData: FormData) {
   const workspace = await requireActiveWorkspace();
-  if (!['owner','admin'].includes(workspace.role)) throw new Error('workspace_admin_required');
+  if (!['owner','admin','member'].includes(workspace.role)) throw new Error('workspace_operator_required');
   const stage = String(formData.get('stage') || '');
   const nextAction = String(formData.get('nextAction') || '').trim();
   const due = String(formData.get('due') || '');
