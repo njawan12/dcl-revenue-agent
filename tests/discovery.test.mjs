@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { canonicalizeDomain, registrableDomain, sameAccountDomain } from '../lib/discovery/domain.js';
 import { detectShopify, detectKnownCommerceApps } from '../lib/discovery/shopify.js';
 import { inspectStorefrontHtml, storefrontNeedVector } from '../lib/discovery/storefront.js';
-import { assertPublicHttpUrl } from '../lib/discovery/http.js';
+import { assertPublicHttpUrl, safeFetchText } from '../lib/discovery/http.js';
 import { dedupeAccounts } from '../lib/discovery/accounts.js';
 import { defineDiscoverySource, runDiscoverySources } from '../lib/discovery/sources.js';
 
@@ -24,6 +24,16 @@ test('blocks private/local crawl targets', () => {
   assert.throws(() => assertPublicHttpUrl('http://127.0.0.1/admin'), /private_host_blocked/);
   assert.throws(() => assertPublicHttpUrl('http://localhost:3000'), /private_host_blocked/);
   assert.equal(assertPublicHttpUrl('https://example.com').hostname, 'example.com');
+});
+
+test('blocks redirects that attempt to reach private hosts', async () => {
+  const fetchImpl = async () => ({
+    status: 302,
+    ok: false,
+    url: 'https://public.example/',
+    headers: { get: (name) => name === 'location' ? 'http://127.0.0.1/admin' : null },
+  });
+  await assert.rejects(() => safeFetchText('https://public.example', { fetchImpl }), /private_host_blocked/);
 });
 
 test('detects Shopify and known commerce technology from public HTML evidence', () => {
