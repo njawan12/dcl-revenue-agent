@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getActiveWorkspace, listUserWorkspaces } from '../lib/workspaces/session';
 import { switchWorkspace } from '../app/workspace/actions';
 import { signOut } from '../app/login/actions';
@@ -8,23 +9,24 @@ const items = [
   { label: 'Opportunities', href: '/#opportunities' },
   { label: 'Accounts', href: '/accounts' },
   { label: 'Contacts', href: '/contacts' },
-  { label: 'Outreach', href: '/outreach' },
+  { label: 'Held outbox', href: '/outreach' },
   { label: 'Pipeline', href: '/pipeline' },
   { label: 'Settings', href: '/settings' },
 ];
 
 export async function Sidebar() {
   const [active, workspaces] = await Promise.all([getActiveWorkspace(), listUserWorkspaces()]);
-  return <aside className="sidebar">
-    <div className="brand">Commerce<span>Revenue Agent</span></div>
-    {active ? <form action={switchWorkspace} style={{margin:'18px 0',display:'grid',gap:7}}>
-      <small>Workspace</small>
-      <select name="workspaceId" defaultValue={active.id} style={{width:'100%',padding:8}}>
-        {workspaces.map(workspace => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
-      </select>
-      <button className="ghost" type="submit">Switch</button>
-    </form> : null}
-    <nav>{items.map((item)=><a key={item.label} href={item.href}>{item.label}</a>)}</nav>
-    <div className="sidebarFoot"><small>Mode</small><strong>Human approval</strong><form action={signOut}><button className="ghost" style={{marginTop:10}}>Sign out</button></form></div>
+  return <aside className="sidebar" aria-label="Workspace navigation">
+    <div className="sidebarTop">
+      <Link className="brand" href="/" aria-label="Commerce Revenue Agent home">Commerce<span>Revenue Agent</span></Link>
+      {active ? <form action={switchWorkspace} className="workspaceSwitcher">
+        <label htmlFor="workspace-switcher">Workspace</label>
+        <div className="workspaceSwitcherRow"><select id="workspace-switcher" name="workspaceId" defaultValue={active.id} aria-label="Active workspace">
+          {workspaces.map(workspace => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
+        </select>{workspaces.length > 1 ? <button className="ghost" type="submit">Switch</button> : null}</div>
+      </form> : null}
+    </div>
+    <nav aria-label="Primary">{items.map((item)=><Link key={item.label} href={item.href}>{item.label}</Link>)}</nav>
+    <div className="sidebarFoot"><div><small>Operating mode</small><strong>Human approval</strong></div><form action={signOut}><button className="ghost" type="submit">Sign out</button></form></div>
   </aside>;
 }
