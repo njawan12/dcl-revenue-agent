@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '../../lib/supabase/server';
 import { requireActiveWorkspace } from '../../lib/workspaces/session';
 
-function reviewRedirect(message: string, kind: 'notice'|'error' = 'notice') {
+function reviewRedirect(message: string, kind: 'notice'|'error' = 'notice'): never {
   redirect(`/outreach?${kind}=${encodeURIComponent(message)}`);
 }
 
