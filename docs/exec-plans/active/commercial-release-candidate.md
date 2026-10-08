@@ -4,17 +4,18 @@
 Ship a commercially credible, premium commerce revenue intelligence product for agencies and ecommerce service companies. DCL is customer #1, not a hard-coded tenant.
 
 ## Current audit
-Primary Command Center and Opportunity surfaces are now workspace-backed rather than mock-backed. Revision-bound approval, held outbox, central suppression, native pipeline, change intelligence, immutable scoring receipts and score-movement explanation are implemented. Live database/provider/browser validation remains a release risk and must not be implied by CI alone.
+Primary Command Center and Opportunity surfaces are workspace-backed rather than mock-backed. Revision-bound approval, held outbox, central suppression, native pipeline, change intelligence, immutable scoring receipts, score-movement explanation, persistent leased discovery execution, replaceable CRM sync contracts, and auditable data-governance/provenance foundations are implemented. Live database/provider/browser validation remains a release risk and must not be implied by CI alone.
 
 ## Product decisions
 - Initial motion: Shopify/DTC agencies and ecommerce service companies; services remain workspace configuration.
 - Roles: Owner/Admin may approve outreach; Member may research/edit/draft; Viewer is read-only. Enforce server-side.
 - Outbound boundary: draft -> needs_review -> approved -> held. No external send in this release candidate.
 - Native CRM: accounts, contacts, opportunities, stage, owner, value, notes, tasks, next action, timeline, outreach/meeting state, won/lost and suppression.
-- CRM adapters: HubSpot first contract, then Salesforce, Attio and Pipedrive; never fake live integrations.
+- CRM adapters: versioned replaceable contracts for HubSpot, Salesforce, Attio and Pipedrive; never fake live integrations.
 - Scoring: deterministic, versioned and auditable. AI may extract/classify evidence but may not invent final scores.
 - Evidence confidence considers source reliability, freshness, corroboration and direct observation vs inference.
 - Proof library: only explicitly approved claims may enter outreach; never fabricate metrics, relationships or outcomes.
+- Jurisdiction policy: rules are conservative, versioned policy gates. They express product eligibility for review, never a claim of legal compliance.
 
 ## Signature journey
 Daily Command Center -> Opportunity -> Why now/commercial thesis -> score explanation -> evidence receipts -> commerce findings -> signal timeline -> buyer map -> verified professional contact -> recommended motion -> approved proof -> evidence-grounded draft -> human review -> approval -> held outbox -> native pipeline/next action.
@@ -28,6 +29,7 @@ Daily Command Center -> Opportunity -> Why now/commercial thesis -> score explan
 6. Suppression/unsubscribe is enforced centrally and cannot be bypassed by provider adapters.
 7. Core scoring, evidence, history and workflow remain vendor-independent.
 8. ICP, services, scoring weights, providers, CRM adapters, proof rules, workflow states and presentation copy are configuration-driven where commercially sensible.
+9. Region-aware outreach policy is deny-by-default for unknown/unvalidated jurisdictions and must run before held-outbox eligibility.
 
 ## UX direction
 ### Daily Command Center
@@ -48,7 +50,8 @@ Design conservatively for privacy and outreach compliance without claiming unive
 - [x] define revision-bound approval + held outbox contracts;
 - [x] central suppression enforcement;
 - [x] versioned evidence/scoring schema and immutable score receipts;
-- [ ] durable job contract with workspace isolation, idempotency, leases, bounded retries and inspectable terminal failures.
+- [x] durable job contract with workspace isolation, idempotency, leases, bounded retries and inspectable terminal failures;
+- [x] leased discovery worker execution with closed job types and no outbound action.
 
 ### P1 — real commerce intelligence
 - [x] replace primary-screen mock dependencies with workspace-backed read models;
@@ -65,10 +68,15 @@ Design conservatively for privacy and outreach compliance without claiming unive
 ### P3 — held outbox and native pipeline
 - [x] held-only outbound queue;
 - [x] native pipeline, next action and activity timeline;
-- [ ] CRM adapter contracts with idempotency/conflict semantics.
+- [x] CRM adapter contracts with deterministic idempotency and explicit two-sided conflict semantics.
 
-### P4 — premium UX and acceptance hardening
-UX quality is continuous, but final hardening includes responsive/keyboard passes, loading/empty/error/permission/stale states, dead-nav removal and customer-demo polish.
+### P4 — governance, policy and premium acceptance
+- [x] workspace retention/purpose policy foundation;
+- [x] append-only provider/source provenance with explicit licensing verification state;
+- [x] auditable deletion-request workflow without unguarded destructive action;
+- [ ] versioned region-aware outreach eligibility policy, deny-by-default when legal basis/policy is unresolved;
+- [ ] wire policy decision into held-outbox eligibility and audit receipt;
+- [ ] responsive/keyboard pass, loading/empty/error/permission/stale states, dead-nav removal and customer-demo polish.
 
 ## Acceptance gates
 - `docs/QUALITY_SCORE.md` >= 85/100 and no hard fail.
@@ -84,11 +92,11 @@ UX quality is continuous, but final hardening includes responsive/keyboard passe
 - Live DB/provider/browser validation remains explicitly unverified until actually exercised.
 
 ## Current risks
-- Durable discovery/enrichment execution is not yet protected by a persistent lease/retry/idempotency contract.
 - Live database/provider/browser flows have not yet been verified.
-- Provider data licensing/source terms require verification before production collection at scale.
-- Jurisdiction-specific outreach rules require counsel/policy validation before enabling delivery.
-- Retention/deletion controls and region-aware policy hooks remain incomplete.
+- Provider data licensing/source terms require verification before production collection at scale; unverified sources must remain visibly unverified.
+- Jurisdiction-specific outreach rules require counsel/policy validation before enabling delivery; unknown policy must block rather than guess.
+- Retention values are product defaults and require policy/legal validation before production enforcement.
+- Final customer-demo visual/accessibility acceptance has not yet been completed.
 
 ## Next implementation slice
-Implement the durable job contract before expanding providers: workspace-scoped jobs, deterministic idempotency keys, lease ownership/expiry, bounded retries with inspectable errors, and safe terminal states. No job may send outreach or bypass suppression/approval boundaries.
+Implement a versioned, deterministic region-aware outreach policy gate. It must be configuration-driven, distinguish product-policy eligibility from legal compliance, deny by default when jurisdiction or required policy inputs are unresolved, preserve suppression and verified-professional-email requirements, produce an auditable reason-coded decision receipt, and never send externally. Then bind that receipt into held-outbox eligibility before final UX/acceptance hardening.
