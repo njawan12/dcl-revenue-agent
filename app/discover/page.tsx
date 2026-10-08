@@ -2,18 +2,27 @@ import { Sidebar } from '../../components/Sidebar';
 import { getDiscoveryDashboard } from '../../lib/db/dashboard';
 import { createClient } from '../../lib/supabase/server';
 import { requireActiveWorkspace } from '../../lib/workspaces/session';
+import { queueDiscovery } from './actions';
 
 export const dynamic = 'force-dynamic';
 
-export default async function DiscoverPage() {
-  const workspace = await requireActiveWorkspace();
+export default async function DiscoverPage({ searchParams }: { searchParams: Promise<Record<string,string|undefined>> }) {
+  const [workspace, query] = await Promise.all([requireActiveWorkspace(), searchParams]);
   const supabase = await createClient();
-  const data = await getDiscoveryDashboard(supabase, workspace.id);
+  const [data, jobsResult] = await Promise.all([
+    getDiscoveryDashboard(supabase, workspace.id),
+    supabase.from('durable_jobs').select('id,job_type,status,attempt_count,max_attempts,created_at,available_at,last_error').eq('workspace_id',workspace.id).eq('job_type','discovery').order('created_at',{ascending:false}).limit(6),
+  ]);
+  const canOperate = ['owner','admin','member'].includes(workspace.role);
+  const jobs = jobsResult.error ? [] : jobsResult.data ?? [];
   return <div className="shell"><Sidebar/><main><header><div><div className="eyebrow">Discovery engine</div><h1>Shopify prospect discovery</h1><p>{workspace.name}: find, verify and rank Shopify brands before any outreach is generated.</p></div></header>
+  {query.error ? <section className="panel noticePanel"><strong>Discovery could not be queued</strong><p>{query.error}</p></section> : null}
+  {query.notice ? <section className="panel noticePanel"><strong>{query.notice}</strong></section> : null}
   {!data.configured ? <section className="panel"><span className="eyebrow">Setup required</span><h2>Connect Supabase to activate discovery history.</h2><p>The discovery pipeline is built, but this environment does not yet have the Supabase credentials required to persist and display live runs.</p></section> : <>
+  <section className="panel"><div className="panelHead"><div><span className="eyebrow">Durable discovery</span><h2>Queue research without babysitting the browser</h2></div><span className="pill">Human initiated · no outbound</span></div><p>Each scope receives a deterministic idempotency key. Repeating the same request resolves to the same durable unit of work instead of silently creating duplicate research.</p>{canOperate ? <form action={queueDiscovery} className="discoveryForm"><label><span>Research brief</span><input name="query" required defaultValue="Shopify brands showing a current ecommerce service need" maxLength={160}/></label><label><span>Country</span><input name="country" placeholder="US" maxLength={2}/></label><input type="hidden" name="source" value="command-center"/><button className="primary" type="submit">Queue discovery</button></form> : <div className="emptyState"><strong>Read-only workspace role</strong><p>Owners, admins and members can queue research. Viewers can inspect results without starting jobs.</p></div>}</section>
   <section className="metrics"><div className="card"><span>Accounts discovered</span><strong>{data.totals.accounts}</strong><small>Workspace-scoped domains</small></div><div className="card"><span>Verified Shopify</span><strong>{data.totals.verifiedShopify}</strong><small>Independent storefront verification</small></div><div className="card"><span>Signals</span><strong>{data.totals.signals}</strong><small>Storefront + tech + hiring + growth</small></div></section>
-  <section className="panel"><div className="panelHead"><div><span className="eyebrow">Run history</span><h2>Recent discovery runs</h2></div></div>
-  <div className="table"><div className="row tableHeader"><span>Status</span><span>Started</span><span>Sources</span><span>Accounts</span><span>Signals</span><span>Errors</span></div>{data.runs.map((run:any)=><div className="row" key={run.id}><span className="pill">{run.status}</span><strong>{new Date(run.started_at).toLocaleString()}</strong><span>{(run.source_names ?? []).join(', ')}</span><span>{run.accounts_discovered}</span><span>{run.signals_discovered}</span><span>{run.error_count}</span></div>)}</div></section></>}
+  <section className="panel"><div className="panelHead"><div><span className="eyebrow">Work queue</span><h2>Durable research state</h2></div><span className="pill">{jobs.length} recent</span></div>{jobsResult.error ? <div className="emptyState"><strong>Job state is temporarily unavailable</strong><p>Discovery history remains intact. The queue can be inspected again after the read recovers.</p></div> : jobs.length ? <div className="evidenceList">{jobs.map((job:any)=><article className="evidenceItem" key={job.id}><div><strong>{job.status.replaceAll('_',' ')}</strong><small>{new Date(job.created_at).toLocaleString()} · Attempt {job.attempt_count}/{job.max_attempts}{job.last_error ? ` · ${job.last_error}` : ''}</small></div><span className="pill">{job.status === 'retry_wait' ? 'Retry scheduled' : job.status}</span></article>)}</div> : <div className="emptyState"><strong>No queued research yet</strong><p>Start a discovery scope above. Its lifecycle will appear here instead of disappearing into a request timeout.</p></div>}</section>
+  <section className="panel"><div className="panelHead"><div><span className="eyebrow">Run history</span><h2>Completed discovery work</h2></div></div><div className="table"><div className="row tableHeader"><span>Status</span><span>Started</span><span>Sources</span><span>Accounts</span><span>Signals</span><span>Errors</span></div>{data.runs.map((run:any)=><div className="row" key={run.id}><span className="pill">{run.status}</span><strong>{new Date(run.started_at).toLocaleString()}</strong><span>{(run.source_names ?? []).join(', ')}</span><span>{run.accounts_discovered}</span><span>{run.signals_discovered}</span><span>{run.error_count}</span></div>)}</div></section></>}
   <section className="split"><div className="panel"><span className="eyebrow">Verification rule</span><h2>Vendor match ≠ verified Shopify.</h2><p>Candidate providers can nominate accounts, but a storefront is only marked verified after our crawler finds sufficient public Shopify evidence.</p></div><div className="panel"><span className="eyebrow">Current gate</span><h2>50 real accounts.</h2><p>M1 remains incomplete until the system produces 50 real accounts and at least 70% are judged genuinely worth pursuing.</p></div></section>
   </main></div>;
 }
