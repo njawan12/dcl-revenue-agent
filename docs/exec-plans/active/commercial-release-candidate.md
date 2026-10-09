@@ -4,11 +4,11 @@
 Ship a commercially credible, premium commerce revenue intelligence product for agencies and ecommerce service companies. DCL is customer #1, not a hard-coded tenant.
 
 ## Current audit
-Primary Command Center and Opportunity surfaces are workspace-backed rather than mock-backed. Revision-bound approval, held outbox, central suppression, native pipeline, change intelligence, immutable scoring receipts, score-movement explanation, persistent leased discovery execution, replaceable CRM sync contracts, auditable data-governance/provenance foundations, and a deny-by-default versioned outreach-policy receipt are implemented. The exact policy receipt is bound to approval at the database boundary and surfaced in Held Outbox. Responsive navigation and policy states have completed CI. Live database/provider/browser validation remains a release risk and must not be implied by CI alone.
+Primary Command Center and Opportunity surfaces are workspace-backed rather than mock-backed. Revision-bound approval, held outbox, central suppression, native pipeline, change intelligence, immutable scoring receipts, score-movement explanation, persistent leased discovery execution, replaceable CRM sync contracts, auditable data-governance/provenance foundations, and a deny-by-default versioned outreach-policy receipt are implemented. The exact policy receipt is bound to approval at the database boundary and surfaced in Held Outbox. Command Center, Opportunity, Accounts, Contacts and Pipeline now use explicit partial/error states rather than silently treating failed reads as zero/empty intelligence. Recent CI through Pipeline hardening is green. Live database/provider/browser validation remains a release risk and must not be implied by CI alone.
 
 ## Product decisions
 - Initial motion: Shopify/DTC agencies and ecommerce service companies; services remain workspace configuration.
-- Roles: Owner/Admin may approve outreach; Member may research/edit/draft; Viewer is read-only. Enforce server-side.
+- Roles: Owner/Admin may approve outreach; Member may research/edit/draft and operate pipeline; Viewer is read-only. Enforce server-side.
 - Outbound boundary: draft -> needs_review -> approved -> held. No external send in this release candidate.
 - Native CRM: accounts, contacts, opportunities, stage, owner, value, notes, tasks, next action, timeline, outreach/meeting state, won/lost and suppression.
 - CRM adapters: versioned replaceable contracts for HubSpot, Salesforce, Attio and Pipedrive; never fake live integrations.
@@ -57,7 +57,7 @@ Design conservatively for privacy and outreach compliance without claiming unive
 - [x] replace primary-screen mock dependencies with workspace-backed read models;
 - [x] evidence receipts and score explanation;
 - [x] commerce/storefront findings and signal history;
-- [~] explicit partial/stale states; continue acceptance hardening.
+- [x] explicit partial/error states on signature intelligence and account/buyer/pipeline surfaces; stale-state acceptance remains part of final browser validation.
 
 ### P2 — buyer, proof and approval
 - [x] buyer map/contact verification model;
@@ -76,7 +76,9 @@ Design conservatively for privacy and outreach compliance without claiming unive
 - [x] auditable deletion-request workflow without unguarded destructive action;
 - [x] versioned region-aware outreach eligibility policy, deny-by-default when legal basis/policy is unresolved;
 - [x] wire policy decision into held-outbox eligibility and audit receipt;
-- [~] responsive/keyboard pass, loading/empty/error/permission/stale states, dead-nav removal and customer-demo polish.
+- [x] signature Command Center/Opportunity truthfulness and partial-state hardening;
+- [x] Accounts/Contacts/Pipeline secondary-surface resilience pass;
+- [~] Settings/governance presentation, remaining loading/permission/stale states, accessibility/dead-nav audit and customer-demo polish.
 
 ## Acceptance gates
 - `docs/QUALITY_SCORE.md` >= 85/100 and no hard fail.
@@ -96,7 +98,8 @@ Design conservatively for privacy and outreach compliance without claiming unive
 - Provider data licensing/source terms require verification before production collection at scale; unverified sources must remain visibly unverified.
 - Jurisdiction-specific outreach rules require counsel/policy validation before enabling delivery; unknown policy must block rather than guess.
 - Retention values are product defaults and require policy/legal validation before production enforcement.
-- Final customer-demo visual/accessibility acceptance has not yet been completed.
+- Settings/governance still needs a truthful partial-state and premium acceptance pass.
+- Final browser-level accessibility/stale-state/customer-demo acceptance has not yet been completed.
 
 ## Next implementation slice
-Complete signature-surface acceptance on Daily Command Center and Opportunity Intelligence. Replace residual table/admin-dashboard storytelling with a premium decision queue, make partial-read states explicit instead of silently treating missing data as zero, sharpen first-viewport narrative and next-action hierarchy, and preserve evidence/readiness truthfulness. Then complete dead-navigation/state audit and score the release against `docs/QUALITY_SCORE.md`. Do not deploy or enable sending.
+Harden Settings/governance so configuration, suppression and account-context failures are independent and never collapse into a raw application error or misleading empty ledger. Surface retention/purpose/provenance posture without implying legal compliance. Then complete remaining route/state/accessibility audit and score the release against `docs/QUALITY_SCORE.md`. Do not deploy or enable sending.
