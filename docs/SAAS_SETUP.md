@@ -1,51 +1,46 @@
-# Commerce Revenue Agent — SaaS Setup
+# DCL Revenue Agent — SaaS / Private Staging Setup
 
-This repository is designed to run as a multi-tenant SaaS application with Digital Commerce Lab as the first workspace.
+This repository runs as a multi-tenant SaaS application with Digital Commerce Lab as the first workspace. This guide is operational setup, not deployment authorization or a legal-compliance claim.
 
-## 1. Repository visibility
+## 1. Credential boundary
 
-Before adding any real credentials, make this GitHub repository **private**. Never commit `.env`, `.env.local`, provider keys, Supabase service-role keys, SMTP credentials, or outbound mailbox credentials.
+Never commit `.env`, `.env.local`, provider keys, Supabase service-role keys, mailbox credentials or access tokens. Use an isolated staging Supabase project and non-production provider credentials for acceptance. Do not seed unnecessary personal data.
 
-## 2. Supabase project
+The repository is currently publicly visible, so treat its full Git history as public and never place a secret in a commit even temporarily.
 
-Create a Supabase project and apply migrations in order:
+## 2. Supabase project and migrations
 
-1. `001_initial.sql`
-2. `002_discovery_runs.sql`
-3. `003_lockdown_rls.sql`
-4. `004_multitenant_productization.sql`
-5. `005_bootstrap_dcl_workspace.sql`
-6. `006_workspace_onboarding.sql`
+Create an isolated Supabase project and apply **every SQL migration in `supabase/migrations/` in numeric order through the current repository head**. Do not use the old 001–006 list as a complete schema; later migrations contain contact intelligence, revision-bound approvals, held-outbox guards, native pipeline, suppression, scoring history, durable jobs, governance/provenance and outreach-policy enforcement.
 
-The multi-tenant migrations enable RLS and workspace isolation. Browser/client access must use the publishable/anon key. The service-role key is server-only and is reserved for trusted background discovery workers and the one-time pre-provisioned workspace claim.
+After applying migrations, record the migration head in the staging acceptance record. Browser/client access uses the publishable/anon key. `SUPABASE_SERVICE_ROLE_KEY` is server-only and reserved for trusted server/background operations.
 
 ## 3. Authentication
 
 Enable Email + Password authentication in Supabase Auth.
 
-Hosted Supabase projects normally require email confirmation. For SSR confirmation, configure the Confirm signup email template to point at the server confirmation route using a token hash, for example:
+For SSR confirmation, configure the Confirm signup email template to point at the server confirmation route using a token hash, for example:
 
 ```text
 {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email
 ```
 
-Set Supabase **Site URL** to the production app URL and add localhost / preview URLs as appropriate in Redirect URLs.
+Set Supabase Site URL to the private preview URL when one exists and add localhost/private preview URLs as appropriate in Redirect URLs.
 
 ## 4. Environment variables
 
-Set these in the deployment platform rather than committing them:
+Set deployment/staging variables in the environment rather than committing them:
 
 ```text
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_SITE_URL=https://your-product-domain.com
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 # Optional one-time claim of an already seeded workspace
 BOOTSTRAP_WORKSPACE_ID=
 BOOTSTRAP_OWNER_EMAIL=
 
-# Background discovery
+# Background discovery / configured adapters
 WORKSPACE_ID=
 STORELEADS_API_KEY=
 BUILTWITH_API_KEY=
@@ -55,59 +50,62 @@ PROSPEO_API_KEY=
 OUTBOUND_PROVIDER_API_KEY=
 ```
 
-`NEXT_PUBLIC_SUPABASE_ANON_KEY` is supported as a temporary fallback while migrating older Supabase projects, but new environments should prefer the publishable key.
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` remains a compatibility fallback for older Supabase projects; new environments should prefer the publishable key.
 
-## 5. First customer / pre-provisioned workspace
+`OUTBOUND_PROVIDER_API_KEY` must not be interpreted as permission to send. The commercial candidate has no autonomous/external sending path; approved revisions remain held.
 
-Migration `005_bootstrap_dcl_workspace.sql` seeds the internal Digital Commerce Lab workspace and backfills pre-commercial records into it.
+## 5. First workspace
 
-To attach the first authenticated owner without hard-coding an identity in the repository:
+The historical DCL bootstrap migration seeds the internal workspace. To attach the first authenticated owner without hard-coding an identity:
 
 1. Set `BOOTSTRAP_WORKSPACE_ID` to the seeded workspace UUID.
-2. Set `BOOTSTRAP_OWNER_EMAIL` to the email that is allowed to claim it.
-3. Sign up / confirm that account.
-4. The onboarding screen will offer **Claim existing workspace** when the authenticated email matches.
-5. `/bootstrap` inserts the caller as owner using a server-only admin client.
+2. Set `BOOTSTRAP_OWNER_EMAIL` to the email allowed to claim it.
+3. Sign up and confirm that account.
+4. Use the onboarding claim path when offered.
+5. Remove both bootstrap variables immediately after the one-time claim succeeds.
 
-The claim is deliberately one-time: it is rejected once the target workspace has any member. After the claim succeeds, remove `BOOTSTRAP_WORKSPACE_ID` and `BOOTSTRAP_OWNER_EMAIL` from the deployment environment.
+New SaaS tenants create their own workspace through onboarding; they do not use bootstrap variables.
 
-New SaaS customers do not use bootstrap variables. They create their own workspace from `/onboarding`. The `create_workspace_with_owner` RPC atomically creates:
+## 6. Tenant and role acceptance
 
-- workspace
-- owner membership
-- starter sales/ICP configuration
+Before treating staging as valid, create two distinct test workspaces and exercise Viewer, Member, Admin and Owner. Follow `docs/acceptance/staging-validation.md` rather than assuming migration success proves isolation.
 
-This avoids a first-workspace RLS deadlock.
+At minimum verify workspace isolation for accounts, contacts, signals, scoring receipts, pipeline events, outreach/revisions/approvals, suppression, provenance/governance and durable jobs. Verify Viewer cannot mutate, Member cannot approve, and Owner/Admin review remains exact-revision and policy gated.
 
-## 6. Tenant safety model
+## 7. Durable discovery
 
-- Every commercial data record is scoped to `workspace_id`.
-- RLS validates membership on client/server-user queries.
-- Owners/admins may change workspace configuration.
-- Members/viewers cannot alter sales configuration.
-- Active-workspace cookies are never trusted alone; membership is revalidated before use.
-- The discovery dashboard uses the authenticated user's Supabase client, not the service-role client.
-- Background discovery workers may use the service role, but must always receive an explicit workspace ID.
-- Pre-provisioned workspace bootstrap is disabled unless both bootstrap environment variables are present, requires an authenticated matching email and refuses already-claimed workspaces.
+Discovery is a server/background-worker process. Configured staging providers may be used only after their source/API terms are verified for the intended test.
 
-## 7. Live discovery
+Exercise success, idempotent enqueue, transient retry, lease expiry/reclaim, stale-worker completion rejection and terminal failure. Do not claim a provider integration is validated merely because its adapter compiles.
 
-Live discovery remains a server/background-worker process. Set `WORKSPACE_ID` to the target workspace and run:
+## 8. Held-outbox safety
+
+The staging journey must demonstrate:
+
+- evidence required
+- verified professional email required
+- central suppression enforced
+- unresolved/unverified region policy blocked by default
+- Owner/Admin exact-revision approval required
+- a newer revision invalidates prior approval state
+- approved item remains held
+- no provider send action is invoked
+
+Product-policy eligibility means eligible for human review only; it is not a legal-compliance determination.
+
+## 9. Private preview acceptance
+
+Run:
 
 ```bash
-npm run discover
+npm ci
+npm test
+npm run build
+npm run dev
 ```
 
-Store Leads is preferred when `STORELEADS_API_KEY` is present. BuiltWith is the fallback.
+Then execute `docs/acceptance/browser-acceptance.md` at desktop, tablet and mobile widths with realistic safe data. Capture the candidate SHA and pass/fail notes.
 
-Do not enable automated outbound until the workspace has passed its lead-quality validation gate.
+## 10. Deployment boundary
 
-## 8. Deployment
-
-Recommended initial deployment:
-
-- Vercel: Next.js web application
-- Supabase: Postgres, Auth and RLS
-- Separate scheduled/background runner: discovery, enrichment and later follow-up jobs
-
-Keep provider/service-role secrets in server-only environment variables. Never expose them with the `NEXT_PUBLIC_` prefix.
+A private staging/preview environment is the next verification environment, not a public production launch. Do not enable autonomous outbound. Do not infer jurisdiction-specific legal permission from product policy. Retention/deletion defaults and provider/source terms must be validated before production enforcement or scale.
