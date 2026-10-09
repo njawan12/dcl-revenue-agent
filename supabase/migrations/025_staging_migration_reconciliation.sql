@@ -1,0 +1,11 @@
+-- No-op reconciliation marker.
+--
+-- During live private-staging verification, the operator-RLS and proof-boundary
+-- changes were first applied under descriptive migration names and then replayed
+-- from their numbered repository files (021-023). Those migrations are
+-- idempotent, so product behavior did not diverge. Keep this marker so the
+-- staging migration ledger and repository history have an explicit shared
+-- reconciliation point rather than an unexplained environment-only version.
+--
+-- This migration intentionally changes no schema, permissions, or data.
+select 1;
