@@ -4,7 +4,7 @@
 Ship a commercially credible, premium commerce revenue intelligence product for agencies and ecommerce service companies. DCL is customer #1, not a hard-coded tenant.
 
 ## Current audit
-Primary Command Center and Opportunity surfaces are workspace-backed rather than mock-backed. Revision-bound approval, held outbox, central suppression, native pipeline, change intelligence, immutable scoring receipts, score-movement explanation, persistent leased discovery execution, replaceable CRM sync contracts, and auditable data-governance/provenance foundations are implemented. Live database/provider/browser validation remains a release risk and must not be implied by CI alone.
+Primary Command Center and Opportunity surfaces are workspace-backed rather than mock-backed. Revision-bound approval, held outbox, central suppression, native pipeline, change intelligence, immutable scoring receipts, score-movement explanation, persistent leased discovery execution, replaceable CRM sync contracts, auditable data-governance/provenance foundations, and a deny-by-default versioned outreach-policy receipt are implemented. The exact policy receipt is bound to approval at the database boundary and surfaced in Held Outbox. Responsive navigation and policy states have completed CI. Live database/provider/browser validation remains a release risk and must not be implied by CI alone.
 
 ## Product decisions
 - Initial motion: Shopify/DTC agencies and ecommerce service companies; services remain workspace configuration.
@@ -74,9 +74,9 @@ Design conservatively for privacy and outreach compliance without claiming unive
 - [x] workspace retention/purpose policy foundation;
 - [x] append-only provider/source provenance with explicit licensing verification state;
 - [x] auditable deletion-request workflow without unguarded destructive action;
-- [ ] versioned region-aware outreach eligibility policy, deny-by-default when legal basis/policy is unresolved;
-- [ ] wire policy decision into held-outbox eligibility and audit receipt;
-- [ ] responsive/keyboard pass, loading/empty/error/permission/stale states, dead-nav removal and customer-demo polish.
+- [x] versioned region-aware outreach eligibility policy, deny-by-default when legal basis/policy is unresolved;
+- [x] wire policy decision into held-outbox eligibility and audit receipt;
+- [~] responsive/keyboard pass, loading/empty/error/permission/stale states, dead-nav removal and customer-demo polish.
 
 ## Acceptance gates
 - `docs/QUALITY_SCORE.md` >= 85/100 and no hard fail.
@@ -99,4 +99,4 @@ Design conservatively for privacy and outreach compliance without claiming unive
 - Final customer-demo visual/accessibility acceptance has not yet been completed.
 
 ## Next implementation slice
-Implement a versioned, deterministic region-aware outreach policy gate. It must be configuration-driven, distinguish product-policy eligibility from legal compliance, deny by default when jurisdiction or required policy inputs are unresolved, preserve suppression and verified-professional-email requirements, produce an auditable reason-coded decision receipt, and never send externally. Then bind that receipt into held-outbox eligibility before final UX/acceptance hardening.
+Complete signature-surface acceptance on Daily Command Center and Opportunity Intelligence. Replace residual table/admin-dashboard storytelling with a premium decision queue, make partial-read states explicit instead of silently treating missing data as zero, sharpen first-viewport narrative and next-action hierarchy, and preserve evidence/readiness truthfulness. Then complete dead-navigation/state audit and score the release against `docs/QUALITY_SCORE.md`. Do not deploy or enable sending.
