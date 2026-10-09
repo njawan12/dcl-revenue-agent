@@ -12,6 +12,6 @@ Work:
 - Inspect authenticated browser journey once staging dashboard/test-account access is available.
 - Record evidence and unresolved access/provider gates honestly before deployment.
 
-Dashboard Auth configuration is not exposed through connected Supabase tools. Dashboard currently requires user sign-in. Existing local checkout had unrelated changes; this checkout starts from remote main and leaves those changes untouched.
+Dashboard Auth configuration is not exposed through connected Supabase tools. Dashboard access became available and exact preview Site URL/callback settings were saved. Existing local checkout had unrelated changes; this checkout starts from remote main and leaves those changes untouched.
 
-Progress: callback/session fixes implemented; suppression and approval defects reproduced and fixed; 58 rollback-only live checks pass; 75 unit tests/build pass. See docs/acceptance/staging-2026-10-09.md for scope and pending dashboard/browser/provider evidence. Authenticated browser journey remains pending user sign-in.
+Progress: callback/session fixes implemented; suppression and approval defects reproduced and fixed; 58 rollback-only live checks pass; 75 unit tests/build pass. See docs/acceptance/staging-2026-10-09.md for scope and pending dashboard/browser/provider evidence. Authenticated browser journey remains pending a preview account. Main merge was rejected by automatic approval review; explicit approval is requested for green PR #13.
