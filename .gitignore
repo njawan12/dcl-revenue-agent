@@ -13,3 +13,6 @@ coverage/
 # Local tooling
 .vercel/
 *.tsbuildinfo
+
+# Supabase CLI local state
+supabase/.temp/

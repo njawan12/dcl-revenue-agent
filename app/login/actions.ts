@@ -2,11 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { createClient } from '../../lib/supabase/server';
-
-function cleanNext(value: FormDataEntryValue | null) {
-  const next = typeof value === 'string' ? value : '/';
-  return next.startsWith('/') && !next.startsWith('//') ? next : '/';
-}
+import { safeNext } from '../../lib/auth/confirmation';
 
 function siteUrl() {
   const value = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000';
@@ -16,7 +12,7 @@ function siteUrl() {
 export async function signIn(formData: FormData) {
   const email = String(formData.get('email') || '').trim();
   const password = String(formData.get('password') || '');
-  const next = cleanNext(formData.get('next'));
+  const next = safeNext(formData.get('next'));
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) redirect(`/login?error=${encodeURIComponent(error.message)}&next=${encodeURIComponent(next)}`);

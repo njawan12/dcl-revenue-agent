@@ -79,7 +79,7 @@ export async function prepareOutreach(formData: FormData) {
 
   const evidenceSnapshot = evidence.map((signal:any) => ({ id: signal.id, type: signal.signal_type, title: signal.title, sourceName: signal.source_name, sourceUrl: signal.source_url, observedAt: signal.observed_at, confidence: signal.confidence }));
   const recipientSnapshot = { contactId: contact.id, name: contact.full_name || [contact.first_name, contact.last_name].filter(Boolean).join(' '), title: contact.title, email: contact.email, emailVerified: true, verificationSource: contact.verification_source || contact.provider || null };
-  const proofSnapshot = (proofs || []).map((proof:any) => ({ id: proof.id, clientName: proof.client_name, approvedClaim: proof.approved_claim, evidenceReference: proof.evidence_reference, serviceTags: proof.service_tags }));
+  const proofSnapshot = (proofs || []).map((proof:any) => ({ proofPointId: proof.id, clientName: proof.client_name, approvedClaim: proof.approved_claim, evidenceReference: proof.evidence_reference, serviceTags: proof.service_tags }));
   const complianceSnapshot = { version: 'held-outbox-v1', accountCountry: account.country || null, verifiedBusinessContact: true, suppressed: false, humanApprovalRequired: true, autonomousSendEnabled: false, jurisdictionReviewStatus: 'required_before_send' };
   const hashPayload = JSON.stringify({ subject: draft.subject, body: draft.body, reasonToContact, evidenceSnapshot, proofSnapshot, recipientSnapshot, complianceSnapshot });
   const contentHash = createHash('sha256').update(hashPayload).digest('hex');
