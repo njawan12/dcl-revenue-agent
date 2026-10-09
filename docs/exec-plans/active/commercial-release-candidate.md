@@ -4,7 +4,7 @@
 Ship a commercially credible, premium commerce revenue intelligence product for agencies and ecommerce service companies. DCL is customer #1, not a hard-coded tenant.
 
 ## Current audit
-Primary Command Center and Opportunity surfaces are workspace-backed rather than mock-backed. Revision-bound approval, held outbox, central suppression, native pipeline, change intelligence, immutable scoring receipts, score-movement explanation, persistent leased discovery execution, replaceable CRM sync contracts, auditable data-governance/provenance foundations, and a deny-by-default versioned outreach-policy receipt are implemented. The exact policy receipt is bound to approval at the database boundary and surfaced in Held Outbox. Command Center, Opportunity, Accounts, Contacts and Pipeline now use explicit partial/error states rather than silently treating failed reads as zero/empty intelligence. Recent CI through Pipeline hardening is green. Live database/provider/browser validation remains a release risk and must not be implied by CI alone.
+Primary Command Center and Opportunity surfaces are workspace-backed rather than mock-backed. Revision-bound approval, held outbox, central suppression, native pipeline, change intelligence, immutable scoring receipts, score-movement explanation, persistent leased discovery execution, replaceable CRM sync contracts, auditable data-governance/provenance foundations, and a deny-by-default versioned outreach-policy receipt are implemented. The exact policy receipt is bound to approval at the database boundary and surfaced in Held Outbox. Command Center, Opportunity, Accounts, Contacts, Pipeline and Settings use explicit partial/error states rather than silently treating failed reads as zero/empty intelligence. An evidence-based repository scorecard records 87/100, above the documented 85 threshold, with environmental verification still open. Private-preview browser and staging acceptance protocols now define those remaining gates. CI and production build are green through the current staging-readiness documentation. Live database/provider/browser validation remains a release risk and must not be implied by CI alone.
 
 ## Product decisions
 - Initial motion: Shopify/DTC agencies and ecommerce service companies; services remain workspace configuration.
@@ -78,7 +78,11 @@ Design conservatively for privacy and outreach compliance without claiming unive
 - [x] wire policy decision into held-outbox eligibility and audit receipt;
 - [x] signature Command Center/Opportunity truthfulness and partial-state hardening;
 - [x] Accounts/Contacts/Pipeline secondary-surface resilience pass;
-- [~] Settings/governance presentation, remaining loading/permission/stale states, accessibility/dead-nav audit and customer-demo polish.
+- [x] Settings/governance truthful partial-state and policy presentation pass;
+- [x] primary navigation route/anchor audit;
+- [x] private-preview browser acceptance protocol;
+- [x] isolated staging/RLS/provider acceptance protocol;
+- [~] execute live private-preview database/provider/browser acceptance when isolated infrastructure is connected.
 
 ## Acceptance gates
 - `docs/QUALITY_SCORE.md` >= 85/100 and no hard fail.
@@ -94,12 +98,11 @@ Design conservatively for privacy and outreach compliance without claiming unive
 - Live DB/provider/browser validation remains explicitly unverified until actually exercised.
 
 ## Current risks
-- Live database/provider/browser flows have not yet been verified.
+- Live database/provider/browser flows have not yet been verified in an isolated staging environment.
 - Provider data licensing/source terms require verification before production collection at scale; unverified sources must remain visibly unverified.
 - Jurisdiction-specific outreach rules require counsel/policy validation before enabling delivery; unknown policy must block rather than guess.
 - Retention values are product defaults and require policy/legal validation before production enforcement.
-- Settings/governance still needs a truthful partial-state and premium acceptance pass.
-- Final browser-level accessibility/stale-state/customer-demo acceptance has not yet been completed.
+- Final browser-level accessibility/stale-state/customer-demo acceptance requires the private preview environment.
 
 ## Next implementation slice
-Harden Settings/governance so configuration, suppression and account-context failures are independent and never collapse into a raw application error or misleading empty ledger. Surface retention/purpose/provenance posture without implying legal compliance. Then complete remaining route/state/accessibility audit and score the release against `docs/QUALITY_SCORE.md`. Do not deploy or enable sending.
+The repository-only commercial candidate is now at the private-preview verification boundary. Once isolated staging infrastructure is connected, apply every migration through current head, validate two-workspace RLS and Viewer/Member/Admin/Owner boundaries, seed realistic safe business data, execute durable discovery failure/retry cases, then run the full desktop/tablet/mobile browser protocol. Fix any observed defects before declaring demo readiness. Do not deploy publicly or enable sending.
