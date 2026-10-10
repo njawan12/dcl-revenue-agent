@@ -16,6 +16,13 @@ test('worker refuses execution without a valid claimed lease', async () => {
   );
 });
 
-test('worker contract is explicitly versioned', () => {
-  assert.equal(DISCOVERY_WORKER_CONTRACT_VERSION, 'discovery-worker-v1');
+test('worker requires the dedicated Crustdata key before touching the database', async () => {
+  await assert.rejects(
+    () => executeDiscoveryJob({}, { id:'1', workspace_id:'w', job_type:'discovery', lease_token:'lease', payload:{} }, {}),
+    /CRUSTDATA_API_KEY/,
+  );
+});
+
+test('worker contract is explicitly versioned for hiring-led discovery', () => {
+  assert.equal(DISCOVERY_WORKER_CONTRACT_VERSION, 'hiring-discovery-worker-v2');
 });
