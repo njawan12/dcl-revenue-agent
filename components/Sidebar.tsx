@@ -6,8 +6,7 @@ import { signOut } from '../app/login/actions';
 const items = [
   { label: 'Command Center', href: '/' },
   { label: 'Discover', href: '/discover' },
-  { label: 'Opportunities', href: '/#opportunities' },
-  { label: 'Accounts', href: '/accounts' },
+  { label: 'Opportunities', href: '/accounts' },
   { label: 'Contacts', href: '/contacts' },
   { label: 'Held outbox', href: '/outreach' },
   { label: 'Pipeline', href: '/pipeline' },
