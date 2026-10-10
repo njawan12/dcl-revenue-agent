@@ -19,7 +19,6 @@ export async function saveOfferProfile(formData:FormData){
   const profileKey=String(formData.get('profileKey')||'').trim()||slugify(name);
   const jobsPerRun=Math.min(25,Math.max(1,number(formData,'jobsPerRun',25)));
   const contactsPerRun=Math.min(25,Math.max(1,number(formData,'contactsPerRun',25)));
-  const policyBasisStatus=formData.get('policyBasisVerified')==='on'?'verified':'pending_review';
   const row={
     workspace_id:workspace.id,
     profile_key:profileKey,
@@ -44,7 +43,6 @@ export async function saveOfferProfile(formData:FormData){
       maxWords:Math.max(60,Math.min(220,number(formData,'maxWords',130))),
       subjectStyle:String(formData.get('subjectStyle')||'plain and relevant; no clickbait').trim(),
       template:String(formData.get('template')||'').trim(),
-      policyBasisStatus,
     },
     caps:{
       jobsPerRun,contactsPerRun,
