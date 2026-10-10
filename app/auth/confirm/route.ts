@@ -12,12 +12,12 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
-      redirectTo.pathname = '/onboarding';
+      redirectTo.pathname = type === 'recovery' ? '/reset-password' : '/onboarding';
       return NextResponse.redirect(redirectTo);
     }
   }
 
   redirectTo.pathname = '/login';
-  redirectTo.searchParams.set('error', 'Email confirmation failed or expired. Please sign in or request a new confirmation.');
+  redirectTo.searchParams.set('error', 'Email link failed or expired. Please request a new one.');
   return NextResponse.redirect(redirectTo);
 }
