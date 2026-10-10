@@ -24,8 +24,8 @@ test('draft prompt makes hiring the primary reason and forbids invention', () =>
 test('Anthropic adapter parses JSON-only draft and exposes token usage', async () => {
   const fetchImpl = async (_url, init) => {
     const body = JSON.parse(init.body);
-    assert.equal(body.model,'claude-sonnet-4-6');
-    return new Response(JSON.stringify({ model:'claude-sonnet-4-6', content:[{type:'text',text:JSON.stringify({subject:'Shopify role',body:'Hi Jamie, I noticed Example Brand is hiring a Shopify Developer. Happy to share what we noticed if useful.\n\nNouman',claims:[],evidenceUsed:['https://jobs.example/shopify']})}], usage:{input_tokens:500,output_tokens:80} }), {status:200,headers:{'content-type':'application/json'}});
+    assert.equal(body.model,'claude-sonnet-5');
+    return new Response(JSON.stringify({ model:'claude-sonnet-5', content:[{type:'text',text:JSON.stringify({subject:'Shopify role',body:'Hi Jamie, I noticed Example Brand is hiring a Shopify Developer. Happy to share what we noticed if useful.\n\nNouman',claims:[],evidenceUsed:['https://jobs.example/shopify']})}], usage:{input_tokens:500,output_tokens:80} }), {status:200,headers:{'content-type':'application/json'}});
   };
   const result = await draftWithAnthropic({apiKey:'test',fetchImpl,account,contact,qualification,profile:DEFAULT_DCL_OFFER_PROFILE,secondaryEvidence:[],approvedProofPoints:[]});
   assert.equal(result.subject,'Shopify role');
