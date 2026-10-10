@@ -39,6 +39,18 @@ export async function signUp(formData: FormData) {
   redirect('/login?notice=Check%20your%20email%20to%20confirm%20your%20account.');
 }
 
+export async function requestPasswordReset(formData: FormData) {
+  const email = String(formData.get('email') || '').trim();
+  if (!email) redirect('/login?mode=forgot&error=Enter%20your%20email%20address');
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${siteUrl()}/auth/confirm?next=/reset-password`,
+  });
+  if (error) redirect(`/login?mode=forgot&error=${encodeURIComponent(error.message)}`);
+  // Keep the confirmation generic so the screen does not reveal whether an account exists.
+  redirect('/login?notice=If%20an%20account%20exists%20for%20that%20email%2C%20a%20password%20reset%20link%20has%20been%20sent.');
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
