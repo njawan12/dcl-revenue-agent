@@ -1,0 +1,7 @@
+@media(max-width:760px){
+  /* Keep the daily mobile journey to five reachable destinations. People remains available from More. */
+  .primaryNav{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  .primaryNav a:nth-child(3){display:none!important}
+  .primaryNav a{min-width:0!important;overflow:hidden}
+  .primaryNav a>span:last-child{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}

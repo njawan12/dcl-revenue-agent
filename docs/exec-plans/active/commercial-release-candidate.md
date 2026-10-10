@@ -1,108 +1,90 @@
 # Commercial Release Candidate
 
-## Mission
-Ship a commercially credible, premium commerce revenue intelligence product for agencies and ecommerce service companies. DCL is customer #1, not a hard-coded tenant.
+## Current objective
+Turn Revenue Agent into a sellable, mobile-first sales operating system that combines hiring-led signal discovery with buyer research, message preparation, approval, shared data, analytics, team controls, and pipeline execution.
 
-## Current audit
-Primary Command Center and Opportunity surfaces are workspace-backed rather than mock-backed. Revision-bound approval, held outbox, central suppression, native pipeline, change intelligence, immutable scoring receipts, score-movement explanation, persistent leased discovery execution, replaceable CRM sync contracts, auditable data-governance/provenance foundations, and a deny-by-default versioned outreach-policy receipt are implemented. The exact policy receipt is bound to approval at the database boundary and surfaced in Held Outbox. Command Center, Opportunity, Accounts, Contacts, Pipeline and Settings use explicit partial/error states rather than silently treating failed reads as zero/empty intelligence. An evidence-based repository scorecard records 87/100, above the documented 85 threshold, with environmental verification still open. Private-preview browser and staging acceptance protocols now define those remaining gates. CI and production build are green through the current staging-readiness documentation. Live database/provider/browser validation remains a release risk and must not be implied by CI alone.
+## Product promise
+Find companies showing a real buying trigger, identify the right person, explain why the lead matters now, prepare a message for human approval, and keep the opportunity moving in one workspace.
 
-## Product decisions
-- Initial motion: Shopify/DTC agencies and ecommerce service companies; services remain workspace configuration.
-- Roles: Owner/Admin may approve outreach; Member may research/edit/draft and operate pipeline; Viewer is read-only. Enforce server-side.
-- Outbound boundary: draft -> needs_review -> approved -> held. No external send in this release candidate.
-- Native CRM: accounts, contacts, opportunities, stage, owner, value, notes, tasks, next action, timeline, outreach/meeting state, won/lost and suppression.
-- CRM adapters: versioned replaceable contracts for HubSpot, Salesforce, Attio and Pipedrive; never fake live integrations.
-- Scoring: deterministic, versioned and auditable. AI may extract/classify evidence but may not invent final scores.
-- Evidence confidence considers source reliability, freshness, corroboration and direct observation vs inference.
-- Proof library: only explicitly approved claims may enter outreach; never fabricate metrics, relationships or outcomes.
-- Jurisdiction policy: rules are conservative, versioned policy gates. They express product eligibility for review, never a claim of legal compliance.
+## Current release gate
+A feature is not considered complete because it exists technically. It must be usable, understandable, mobile-ready, visually coherent, permission-safe, and validated against the core journey.
 
-## Signature journey
-Daily Command Center -> Opportunity -> Why now/commercial thesis -> score explanation -> evidence receipts -> commerce findings -> signal timeline -> buyer map -> verified professional contact -> recommended motion -> approved proof -> evidence-grounded draft -> human review -> approval -> held outbox -> native pipeline/next action.
+### Signature journey
+Home → Leads → Lead detail → People → Messages → Pipeline.
 
-## Architecture constraints
-1. Preserve Next.js/Supabase and replaceable provider adapters unless a documented ADR justifies change.
-2. Every user-facing tenant object carries and enforces workspace ownership. RLS/server authorization is a hard constraint.
-3. Persist evidence and score revisions; recommendations must remain explainable after source data changes.
-4. Long-running discovery/enrichment uses durable jobs with idempotency/retry semantics rather than request-bound work.
-5. Approval is revision-bound: changing approved copy invalidates approval.
-6. Suppression/unsubscribe is enforced centrally and cannot be bypassed by provider adapters.
-7. Core scoring, evidence, history and workflow remain vendor-independent.
-8. ICP, services, scoring weights, providers, CRM adapters, proof rules, workflow states and presentation copy are configuration-driven where commercially sensible.
-9. Region-aware outreach policy is deny-by-default for unknown/unvalidated jurisdictions and must run before held-outbox eligibility.
+Supporting operating surfaces:
+- Find leads
+- Global Data
+- Saved views
+- Analytics
+- Integrations
+- Team
+- Offer profiles
+- Settings / suppression / governance
 
-## UX direction
-### Daily Command Center
-The default home answers: what should I do today? Prioritize a short ranked decision queue, changes since last review, drafts/replies requiring action and pipeline movement. Avoid dashboard vanity metrics and database-table storytelling.
+### Current architecture rules
+- Hiring trigger is primary for the DCL offer profile.
+- Offer profiles keep the engine industry-agnostic.
+- Crustdata is the primary paid discovery, company, buyer and verified-email provider.
+- Greenhouse and Lever are secondary hiring evidence sources.
+- Anthropic is the drafting provider through a replaceable adapter.
+- Human approval remains mandatory for commercial outreach.
+- Autonomous sending remains disabled.
+- Suppression, evidence, provenance, verified professional email, policy receipt, exact-revision approval and tenant isolation remain hard boundaries.
+- CRM integrations must remain adapter-based and must not pretend to be connected before credentials/OAuth exist.
 
-### Opportunity
-First viewport: account identity + commerce context, Opportunity Score with explanation affordance, one-sentence Why Now, recommended service/motion, buyer readiness and one clear next action. Progressive disclosure below for evidence, score factors, timeline, storefront findings, stack, buyers, outreach and pipeline history.
+## Premium UX reset
+The commercial UI is being benchmarked against Apollo, Clay, Common Room, Unify and iClosed for workflow clarity, information density, search/filter patterns, operating views, analytics and pipeline continuity. The product must remain distinct; benchmark patterns may be used, not copied branding or proprietary UI.
 
-### Visual bar
-Premium modern B2B SaaS: strong typography, generous spacing, restrained semantic color, refined panels, deliberate density and polished interaction states. No generic AI gradients/glows, placeholder component-library feel or excessive cards. Design loading, empty, partial, stale, permission and error states intentionally. Keyboard and responsive review flows are required.
+Required customer-facing language:
+- Prefer Home, Leads, People, Messages, Pipeline, Find leads, Global Data, Analytics, Integrations, Team.
+- Keep technical audit terms behind advanced/details surfaces unless required for safety.
+- Every primary screen should answer what the user should do next.
 
-## Legal/compliance product constraints
-Design conservatively for privacy and outreach compliance without claiming universal legal compliance. Include data minimization, purpose limitation, retention/deletion controls, auditability, suppression/unsubscribe, professional/business-contact boundaries, region-aware outreach policy hooks and provenance/licensing metadata for providers and sources. Track issues requiring jurisdiction-specific legal interpretation (including CAN-SPAM, CASL, GDPR/UK PECR and CCPA/CPRA) rather than encoding guesses. No autonomous outbound.
+### Mobile
+- Mobile is a primary acceptance surface, not a shrunk desktop.
+- Bottom navigation for the primary daily journey.
+- No horizontal overflow in the signature journey.
+- Primary CTA reachable without zooming or precision tapping.
 
-## Execution order
-### P0 — security and contracts
-- [x] close material tenant-reference/authorization gaps discovered so far;
-- [x] define revision-bound approval + held outbox contracts;
-- [x] central suppression enforcement;
-- [x] versioned evidence/scoring schema and immutable score receipts;
-- [x] durable job contract with workspace isolation, idempotency, leases, bounded retries and inspectable terminal failures;
-- [x] leased discovery worker execution with closed job types and no outbound action.
+## Operating layer
+### Global Data
+One workspace-scoped searchable source of truth for companies, people, messages and pipeline context.
 
-### P1 — real commerce intelligence
-- [x] replace primary-screen mock dependencies with workspace-backed read models;
-- [x] evidence receipts and score explanation;
-- [x] commerce/storefront findings and signal history;
-- [x] explicit partial/error states on signature intelligence and account/buyer/pipeline surfaces; stale-state acceptance remains part of final browser validation.
+### Saved views
+Users can retain useful operating slices instead of rebuilding filters repeatedly.
 
-### P2 — buyer, proof and approval
-- [x] buyer map/contact verification model;
-- [x] approved proof library contract;
-- [x] evidence-grounded draft generation contract;
-- [x] edit/review/approval with audit history.
+### Analytics
+Track the funnel from discovered/qualified lead → verified buyer → message ready/approved → pipeline stage, plus provider usage/cost visibility. Do not fabricate meetings, replies, attribution or revenue outcomes that are not actually captured.
 
-### P3 — held outbox and native pipeline
-- [x] held-only outbound queue;
-- [x] native pipeline, next action and activity timeline;
-- [x] CRM adapter contracts with deterministic idempotency and explicit two-sided conflict semantics.
+### Team
+Owner/Admin/Member/Viewer role model remains the initial commercial role system. No custom RBAC builder or multi-company billing in the current release.
 
-### P4 — governance, policy and premium acceptance
-- [x] workspace retention/purpose policy foundation;
-- [x] append-only provider/source provenance with explicit licensing verification state;
-- [x] auditable deletion-request workflow without unguarded destructive action;
-- [x] versioned region-aware outreach eligibility policy, deny-by-default when legal basis/policy is unresolved;
-- [x] wire policy decision into held-outbox eligibility and audit receipt;
-- [x] signature Command Center/Opportunity truthfulness and partial-state hardening;
-- [x] Accounts/Contacts/Pipeline secondary-surface resilience pass;
-- [x] Settings/governance truthful partial-state and policy presentation pass;
-- [x] primary navigation route/anchor audit;
-- [x] private-preview browser acceptance protocol;
-- [x] isolated staging/RLS/provider acceptance protocol;
-- [~] execute live private-preview database/provider/browser acceptance when isolated infrastructure is connected.
+### Integrations
+Show honest states: connected, ready to configure, or planned. CRM contract supports HubSpot, Salesforce, Attio and Pipedrive adapters but a provider must not be shown as connected without a real configured connection.
 
-## Acceptance gates
-- `docs/QUALITY_SCORE.md` >= 85/100 and no hard fail.
-- No primary customer-facing surface labels fabricated/sample information as real intelligence.
-- Every consequential recommendation has inspectable provenance.
-- Tenant isolation and authorization are tested server-side.
-- Approved content cannot mutate without invalidating approval.
-- Suppressed contacts cannot enter held outbox.
-- No path can externally send.
-- Primary navigation has no dead/mock-only destinations.
-- Critical states are designed, not browser/default fallbacks.
-- Automated tests and production build pass.
-- Live DB/provider/browser validation remains explicitly unverified until actually exercised.
+## Current external blockers
+- Live Crustdata endpoint/permission validation requires `CRUSTDATA_API_KEY` in the Revenue Agent Render service.
+- Live Claude drafting requires `ANTHROPIC_API_KEY` in the Revenue Agent Render service.
+- First 20 real DCL leads cannot be claimed until those provider credentials are configured and the controlled batch runs.
+- Final jurisdiction-specific outreach policy/legal basis requires qualified review before production sending is enabled.
 
-## Current risks
-- Live database/provider/browser flows have not yet been verified in an isolated staging environment.
-- Provider data licensing/source terms require verification before production collection at scale; unverified sources must remain visibly unverified.
-- Jurisdiction-specific outreach rules require counsel/policy validation before enabling delivery; unknown policy must block rather than guess.
-- Retention values are product defaults and require policy/legal validation before production enforcement.
-- Final browser-level accessibility/stale-state/customer-demo acceptance requires the private preview environment.
+## Acceptance before calling sellable
+- CI tests pass.
+- Production build passes.
+- Supabase migrations/RLS pass staging checks.
+- Desktop, tablet and mobile core journey manually reviewed.
+- No DCL hardcoding in the product shell.
+- Plain-English user copy.
+- No dead navigation.
+- No fake connected integrations or fabricated data.
+- No autonomous send.
+- Real first controlled batch validated once provider keys exist.
 
-## Next implementation slice
-The repository-only commercial candidate is now at the private-preview verification boundary. Once isolated staging infrastructure is connected, apply every migration through current head, validate two-workspace RLS and Viewer/Member/Admin/Owner boundaries, seed realistic safe business data, execute durable discovery failure/retry cases, then run the full desktop/tablet/mobile browser protocol. Fix any observed defects before declaring demo readiness. Do not deploy publicly or enable sending.
+## Explicit non-goals for current release
+- Multi-company billing.
+- Seat monetization.
+- Custom enterprise RBAC builder.
+- Scheduler product parity with iClosed.
+- Fake inbox before a real messaging/reply channel exists.
+- Dozens of shallow integrations.

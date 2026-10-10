@@ -1,9 +1,16 @@
 import './globals.css';
 import './revenue-premium.css';
 import './offer-profile.css';
+import './premium-reset.css';
+import './journey.css';
+import './message-review.css';
+import './ops.css';
+import './kanban.css';
+import './more.css';
+import './mobile-nav.css';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'DCL Revenue Agent', description: 'Hiring-led revenue intelligence for Digital Commerce Lab' };
+export const metadata: Metadata = { title: 'Revenue Agent', description: 'Turn fresh hiring signals into qualified sales opportunities.' };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="en"><body>{children}</body></html>;
