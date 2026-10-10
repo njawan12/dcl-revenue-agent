@@ -26,13 +26,15 @@ export async function signIn(formData: FormData) {
 export async function signUp(formData: FormData) {
   const email = String(formData.get('email') || '').trim();
   const password = String(formData.get('password') || '');
+  const confirmPassword = String(formData.get('confirmPassword') || '');
+  if (password !== confirmPassword) redirect('/login?mode=signup&error=Passwords%20do%20not%20match');
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: { emailRedirectTo: `${siteUrl()}/auth/confirm` },
   });
-  if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/login?mode=signup&error=${encodeURIComponent(error.message)}`);
   if (data.session) redirect('/onboarding');
   redirect('/login?notice=Check%20your%20email%20to%20confirm%20your%20account.');
 }
