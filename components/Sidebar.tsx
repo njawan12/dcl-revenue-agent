@@ -11,6 +11,7 @@ const items = [
   { label: 'Contacts', href: '/contacts' },
   { label: 'Held outbox', href: '/outreach' },
   { label: 'Pipeline', href: '/pipeline' },
+  { label: 'Offer profiles', href: '/settings/offers' },
   { label: 'Settings', href: '/settings' },
 ];
 
@@ -18,7 +19,7 @@ export async function Sidebar() {
   const [active, workspaces] = await Promise.all([getActiveWorkspace(), listUserWorkspaces()]);
   return <aside className="sidebar" aria-label="Workspace navigation">
     <div className="sidebarTop">
-      <Link className="brand" href="/" aria-label="Commerce Revenue Agent home">Commerce<span>Revenue Agent</span></Link>
+      <Link className="brand" href="/" aria-label="DCL Revenue Agent home">DCL<span>Revenue Agent</span></Link>
       {active ? <form action={switchWorkspace} className="workspaceSwitcher">
         <label htmlFor="workspace-switcher">Workspace</label>
         <div className="workspaceSwitcherRow"><select id="workspace-switcher" name="workspaceId" defaultValue={active.id} aria-label="Active workspace">
@@ -27,6 +28,6 @@ export async function Sidebar() {
       </form> : null}
     </div>
     <nav aria-label="Primary">{items.map((item)=><Link key={item.label} href={item.href}>{item.label}</Link>)}</nav>
-    <div className="sidebarFoot"><div><small>Operating mode</small><strong>Human approval</strong></div><form action={signOut}><button className="ghost" type="submit">Sign out</button></form></div>
+    <div className="sidebarFoot"><div><small>Operating mode</small><strong>Hiring-led · human approval</strong></div><form action={signOut}><button className="ghost" type="submit">Sign out</button></form></div>
   </aside>;
 }
