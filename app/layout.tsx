@@ -5,6 +5,8 @@ import './premium-reset.css';
 import './journey.css';
 import './message-review.css';
 import './ops.css';
+import './kanban.css';
+import './more.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Revenue Agent', description: 'Turn fresh hiring signals into qualified sales opportunities.' };
