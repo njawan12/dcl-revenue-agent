@@ -9,10 +9,15 @@ const primaryItems = [
   { label: 'People', href: '/contacts', icon: 'people' },
   { label: 'Messages', href: '/outreach', icon: 'messages' },
   { label: 'Pipeline', href: '/pipeline', icon: 'pipeline' },
+  { label: 'More', href: '/settings', icon: 'more' },
 ];
 
 const secondaryItems = [
+  { label: 'Global Data', href: '/data' },
+  { label: 'Analytics', href: '/analytics' },
   { label: 'Find leads', href: '/discover' },
+  { label: 'Integrations', href: '/integrations' },
+  { label: 'Team', href: '/team' },
   { label: 'Offer profiles', href: '/settings/offers' },
   { label: 'Settings', href: '/settings' },
 ];
