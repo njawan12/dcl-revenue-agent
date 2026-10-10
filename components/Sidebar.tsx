@@ -9,7 +9,7 @@ const primaryItems = [
   { label: 'People', href: '/contacts', icon: 'people' },
   { label: 'Messages', href: '/outreach', icon: 'messages' },
   { label: 'Pipeline', href: '/pipeline', icon: 'pipeline' },
-  { label: 'More', href: '/settings', icon: 'more' },
+  { label: 'More', href: '/more', icon: 'more' },
 ];
 
 const secondaryItems = [
